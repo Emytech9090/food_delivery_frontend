@@ -1,0 +1,16 @@
+const PageTitle = ({
+  title,
+  className="",
+}: {
+  title: string;
+  className?: string;
+}) => {
+  return (
+    <h1
+      className={`text-2xl font-semibold uppercase tracking-widest ${className}`}
+    >
+      {title}
+    </h1>
+  );
+};
+export default PageTitle;
