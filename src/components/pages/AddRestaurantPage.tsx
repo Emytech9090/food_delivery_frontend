@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent } from "react";
 import image from "../../assets/images/img4.png";
 import Input from "../Input";
 import Button from "../Button";
@@ -11,19 +11,22 @@ const AddRestaurantPage = () => {
     description: "",
     image: "",
   });
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: ChangeEvent<HTMLFormElement>) => {
+    console.log("formValue", formValue);
     e.preventDefault();
     const canSubmit = [formValue].every(Boolean);
     if (!canSubmit) {
       alert("please provide all signup credetials");
       return;
     }
-    console.log("submitting to db", formValue);
   };
   const onInputChange = (
     e: ChangeEvent<HTMLTextAreaElement & HTMLInputElement>
   ) => {
-    setFormValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormValue((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   return (
@@ -52,8 +55,7 @@ const AddRestaurantPage = () => {
             rows={5}
           />
           <UploadFile
-            value={formValue.image}
-            onChange={onInputChange}
+            setFormValue={setFormValue}
             id="image"
             name="image"
             type="file"

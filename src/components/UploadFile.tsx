@@ -1,18 +1,18 @@
 import { Trash2, UploadCloud } from "lucide-react";
-import { Cloudinary } from "@cloudinary/url-gen";
-import { auto } from "@cloudinary/url-gen/actions/resize";
-import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
-import { AdvancedImage } from "@cloudinary/react";
+
 import {
   useState,
   type ChangeEvent,
-  type ChangeEventHandler,
+  type Dispatch,
   type InputHTMLAttributes,
+  type SetStateAction,
 } from "react";
+import { uploadToCloudinary } from "../utils";
 
 type UploadFileType = {
-  value: string;
-  onChange: ChangeEventHandler<HTMLInputElement>;
+  setFormValue: Dispatch<
+    SetStateAction<{ image: string; name: string; description: string }>
+  >;
   id: string;
   name: string;
   type: string;
@@ -22,8 +22,7 @@ type UploadFileType = {
   isReversed?: boolean;
 } & InputHTMLAttributes<HTMLInputElement>;
 const UploadFile = ({
-  value,
-  onChange,
+  setFormValue,
   id,
   name,
   type,
@@ -31,24 +30,16 @@ const UploadFile = ({
   ...props
 }: UploadFileType) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
       alert("invalid file selection");
       return;
     }
     setSelectedFile(URL.createObjectURL(file));
-
-    // onChange(e);
+    const url = await uploadToCloudinary(file);
+    setFormValue((prev) => ({ ...prev, [e.target.name]: url }));
   };
-  const cld = new Cloudinary({ cloud: { cloudName: "dlxvm6sxn" } });
-
-  // Use this sample image or upload your own via the Media Library
-  const img = cld
-    .image("cld-sample-5")
-    .format("auto") // Optimize delivery by resizing and applying auto-format and auto-quality
-    .quality("auto")
-    .resize(auto().gravity(autoGravity()).width(500).height(500)); // Transform the image: auto-crop to square aspect_ratio
 
   return (
     <div className="flex w-full items-center">
@@ -64,7 +55,6 @@ const UploadFile = ({
         </label>
         <input
           {...props}
-          value={value}
           onChange={handleChange}
           id={id}
           name={name}
@@ -79,12 +69,12 @@ const UploadFile = ({
             <Trash2
               size={16}
               className="absolute top-2 right-2 text-red-600 z-50"
+              onClick={() => setSelectedFile(null)}
             />
             <img
               src={selectedFile}
               className="object-contain w-24 h-24 rounded-lg "
             />
-            <AdvancedImage cldImg={img} />
           </div>
         </div>
       )}
